@@ -1,15 +1,4 @@
-= Camel Kafka example
 
-
-=== Preparing Kafka
-
-This example requires that Kafka Server is up and running.
-
-    $ ${KAFKA}/bin/zookeeper-server-start.sh ${KAFKA}/config/zookeeper.properties
-
-    $ ${KAFKA}/bin/kafka-server-start.sh ${KAFKA}/config/server.properties
-
-You will need to create following topics before you run the examples.
 
 
 === Build
@@ -44,7 +33,7 @@ keytool -import -noprompt -trustcacerts -file kafkaClient.cer -keystore kafka.ke
 
 
 
-
+Logs:
 2020-10-01 17:38:22.374  INFO 9074 --- [mer[test-topic]] o.a.k.c.c.internals.ConsumerCoordinator  : [Consumer clientId=consumer-test-consumer-group-1, groupId=test-consumer-group] Setting offset for partition test-topic-0 to the committed offset FetchPosition{offset=8, offsetEpoch=Optional[0], currentLeader=LeaderAndEpoch{leader=Optional[localhost:9092 (id: 0 rack: null)], epoch=0}}
 2020-10-01 17:38:23.062  INFO 9074 --- [mer[test-topic]] route2                                   : Hi This is kafka example
 2020-10-01 17:38:23.062  INFO 9074 --- [cer[test-topic]] route1                                   : Hi This is kafka example
