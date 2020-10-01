@@ -1,0 +1,62 @@
+= Camel Kafka example
+
+
+=== Preparing Kafka
+
+This example requires that Kafka Server is up and running.
+
+    $ ${KAFKA}/bin/zookeeper-server-start.sh ${KAFKA}/config/zookeeper.properties
+
+    $ ${KAFKA}/bin/kafka-server-start.sh ${KAFKA}/config/server.properties
+
+You will need to create following topics before you run the examples.
+
+
+=== Build
+
+You will need to compile this example first:
+
+    $ mvn compile
+
+=== Run
+
+Run the consumer first in separate shell 
+
+    $ mvn spring-boot:run
+
+cert notes:
+
+
+# Create the combination keystore/truststore for the client and service.
+# Note you can create separate keystores/truststores for both if desired
+keytool -genkeypair -validity 730 -alias kafkaserverkey -keystore kafka.keystore.jks -dname "cn=localhost" -keypass kkr123 -storepass kkr123
+keytool -genkeypair -validity 730  -keystore kafka.truststore.jks -keypass kkr123 -storepass kkr123
+
+# Place server public cert in client key/truststore
+keytool -export -rfc -keystore kafka.keystore.jks -alias kafkaserverkey -file kafkaService.cer -storepass kkr123
+keytool -import -noprompt -trustcacerts -file kafkaService.cer -alias kafkaserverkey -keystore kafka.truststore.jks -storepass kkr123
+
+# Place client public cert in service key/truststore
+# Note this needs to be done only if you're requiring client authentication
+# as configured in resources/ServerConfig.xml
+keytool -export -rfc -keystore kafka.truststore.jks  -file kafkaClient.cer -storepass kkr123
+keytool -import -noprompt -trustcacerts -file kafkaClient.cer -keystore kafka.keystore.jks -storepass kkr123
+
+
+
+
+2020-10-01 17:38:22.374  INFO 9074 --- [mer[test-topic]] o.a.k.c.c.internals.ConsumerCoordinator  : [Consumer clientId=consumer-test-consumer-group-1, groupId=test-consumer-group] Setting offset for partition test-topic-0 to the committed offset FetchPosition{offset=8, offsetEpoch=Optional[0], currentLeader=LeaderAndEpoch{leader=Optional[localhost:9092 (id: 0 rack: null)], epoch=0}}
+2020-10-01 17:38:23.062  INFO 9074 --- [mer[test-topic]] route2                                   : Hi This is kafka example
+2020-10-01 17:38:23.062  INFO 9074 --- [cer[test-topic]] route1                                   : Hi This is kafka example
+2020-10-01 17:38:23.063  INFO 9074 --- [mer[test-topic]] o.a.camel.component.kafka.KafkaConsumer  : Auto commitSync on stop test-topic-Thread 0 from topic test-topic
+2020-10-01 17:38:23.067  INFO 9074 --- [mer[test-topic]] o.a.camel.component.kafka.KafkaConsumer  : Unsubscribing test-topic-Thread 0 from topic test-topic
+2020-10-01 17:38:23.067  INFO 9074 --- [mer[test-topic]] o.a.k.c.c.internals.ConsumerCoordinator  : [Consumer clientId=consumer-test-consumer-group-1, groupId=test-consumer-group] Revoke previously assigned partitions test-topic-0
+2020-10-01 17:38:23.070  INFO 9074 --- [mer[test-topic]] o.a.k.c.c.internals.AbstractCoordinator  : [Consumer clientId=consumer-test-consumer-group-1, groupId=test-consumer-group] Member consumer-test-consumer-group-1-a3f05afc-75d6-4ec8-8489-e212a8572572 sending LeaveGroup request to coordinator localhost:9092 (id: 2147483647 rack: null) due to the consumer unsubscribed from all topics
+2020-10-01 17:38:23.071  INFO 9074 --- [mer[test-topic]] o.a.k.clients.consumer.KafkaConsumer     : [Consumer clientId=consumer-test-consumer-group-1, groupId=test-consumer-group] Unsubscribed all topics or patterns and assigned partitions
+2020-10-01 17:38:23.077  INFO 9074 --- [mer[test-topic]] o.a.camel.component.kafka.KafkaConsumer  : Terminating KafkaConsumer thread: test-topic-Thread 0 receiving from topic: test-topic
+2020-10-01 17:38:23.078  INFO 9074 --- [ - ShutdownTask] o.a.c.i.engine.DefaultShutdownStrategy   : Route: route2 shutdown complete, was consuming from: kafka://test-topic
+2020-10-01 17:38:23.078  INFO 9074 --- [ - ShutdownTask] o.a.k.clients.producer.KafkaProducer     : [Producer clientId=producer-1] Closing the Kafka producer with timeoutMillis = 9223372036854775807 ms.
+2020-10-01 17:38:23.081  INFO 9074 --- [ - ShutdownTask] o.a.c.i.engine.DefaultShutdownStrategy   : Route: route1 shutdown complete, was consuming from: timer://foo
+2020-10-01 17:38:23.082  INFO 9074 --- [extShutdownHook] o.a.c.i.engine.DefaultShutdownStrategy   : Graceful shutdown of 2 routes completed in 1 seconds
+2020-10-01 17:38:23.086  INFO 9074 --- [extShutdownHook] o.a.c.impl.engine.AbstractCamelContext   : Apache Camel 3.5.0 (camel) uptime 1.268 seconds
+2020-10-01 17:38:23.086  INFO 9074 --- [extShutdownHook] o.a.c.impl.engine.AbstractCamelContext   : Apache Camel 3.5.0 (camel) is shutdown in 1.086 seconds
